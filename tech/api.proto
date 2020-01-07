@@ -1,0 +1,79 @@
+version = "proto3"
+
+message Value {
+  oneof value {
+    string text = 1;
+    sint64 integer = 2;
+    float double = 3;
+    bytes blob = 4;
+  }
+}
+
+message Row {
+  repeated Value = 1;
+}
+
+message QueryResult {
+  repeated string columns = 1;
+  repeated Row rows = 2;
+  string error = 15;
+}
+
+message CommandResult {
+  string result = 1;
+  uint32 modified_rows = 2;
+  string error = 15;
+}
+
+message StatementResult {
+  oneof result { 
+    QueryResult = 1;
+    CommandResult = 2;
+  }
+  string error = 15;
+}
+
+message StoreProcedureRequest {
+  enum Action {
+    CREATE = 0;
+    UPDATE = 1;
+    DELETE = 2;
+    ASSERT = 3;
+  }
+  Action action = 1;
+  string name = 2;
+  string statement = 3;
+}
+
+message StoreProcedureResponse {
+  enum Result {
+    OK = 0;
+    ERROR = 1;
+  }
+  Result result = 1;
+  string error = 15;
+}
+
+message CreateDatabaseResponse {
+  string name = 1;
+  string error = 15;
+}
+
+message QueryProcedureRequest {
+  string procedure_name = 1;
+  repeated Value paramenters = 2;
+}
+
+message ExecProcedureRequest {
+  string procedure_name = 1;
+  repeated Value paramenters = 2;
+}
+
+service SimpleSQL {
+  rpc CreateDatabase() returns (CreateDatabaseResponse);
+  rpc Query(string, string) returns (QueryResult);
+  rpc Exec(string, string) returns (StatementResult);
+  rpc StoreProcedure(string, StoreProcedureRequest) returns (StoreProcedureResponse);
+  rpc QueryProcedure(string, QueryProcedureRequest) returns (QueryResult);
+  rpc ExecProcedure(string, ExecProcedureRequest) returns (StatementResult);
+}
