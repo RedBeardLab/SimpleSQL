@@ -55,7 +55,7 @@ message StoreProcedureResponse {
 }
 
 message CreateDatabaseResponse {
-  string name = 1;
+  Database database = 1;
   string error = 15;
 }
 
@@ -69,11 +69,15 @@ message ExecProcedureRequest {
   repeated Value paramenters = 2;
 }
 
+message Database {
+  string name = 1;
+}
+
 service SimpleSQL {
   rpc CreateDatabase() returns (CreateDatabaseResponse);
-  rpc Query(string, string) returns (QueryResult);
-  rpc Exec(string, string) returns (StatementResult);
-  rpc StoreProcedure(string, StoreProcedureRequest) returns (StoreProcedureResponse);
-  rpc QueryProcedure(string, QueryProcedureRequest) returns (QueryResult);
-  rpc ExecProcedure(string, ExecProcedureRequest) returns (StatementResult);
+  rpc Query(Database, string) returns (QueryResult);
+  rpc Exec(Database, string) returns (StatementResult);
+  rpc StoreProcedure(Database, StoreProcedureRequest) returns (StoreProcedureResponse);
+  rpc QueryProcedure(Database, QueryProcedureRequest) returns (QueryResult);
+  rpc ExecProcedure(Database, ExecProcedureRequest) returns (StatementResult);
 }
