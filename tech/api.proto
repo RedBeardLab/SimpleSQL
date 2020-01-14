@@ -1,4 +1,4 @@
-version = "proto3"
+syntax = "proto3";
 
 message Value {
   oneof value {
@@ -10,7 +10,7 @@ message Value {
 }
 
 message Row {
-  repeated Value = 1;
+  repeated Value value = 1;
 }
 
 message QueryResult {
@@ -27,22 +27,23 @@ message CommandResult {
 
 message StatementResult {
   oneof result { 
-    QueryResult = 1;
-    CommandResult = 2;
+    QueryResult queryResult = 1;
+    CommandResult commandResult = 2;
   }
   string error = 15;
 }
 
 message StoreProcedureRequest {
-  enum Action {
+  Database database = 1;
+	enum Action {
     CREATE = 0;
     UPDATE = 1;
     DELETE = 2;
     ASSERT = 3;
   }
-  Action action = 1;
-  string name = 2;
-  string statement = 3;
+  Action action = 2;
+  string name = 3;
+  string statement = 4;
 }
 
 message StoreProcedureResponse {
@@ -60,24 +61,40 @@ message CreateDatabaseResponse {
 }
 
 message QueryProcedureRequest {
-  string procedure_name = 1;
-  repeated Value paramenters = 2;
+	Database database = 1;
+  string name = 2;
+  repeated Value args = 3;
 }
 
 message ExecProcedureRequest {
-  string procedure_name = 1;
-  repeated Value paramenters = 2;
+	Database database = 1;
+  string procedure_name = 2;
+  repeated Value args = 3;
 }
 
 message Database {
   string name = 1;
 }
 
+message CreateDatabaseRequest {}
+
+message Query {
+	Database database = 1;
+	string query = 2;
+	repeated Value args = 3;
+}
+
+message Command {
+	Database database = 1;
+	string query = 2;
+	repeated Value args = 3;
+}
+
 service SimpleSQL {
-  rpc CreateDatabase() returns (CreateDatabaseResponse);
-  rpc Query(Database, string) returns (QueryResult);
-  rpc Exec(Database, string) returns (StatementResult);
-  rpc StoreProcedure(Database, StoreProcedureRequest) returns (StoreProcedureResponse);
-  rpc QueryProcedure(Database, QueryProcedureRequest) returns (QueryResult);
-  rpc ExecProcedure(Database, ExecProcedureRequest) returns (StatementResult);
+  rpc CreateDatabase(CreateDatabaseRequest) returns (CreateDatabaseResponse) {}
+  rpc DoQuery(Query) returns (QueryResult) {}
+  rpc DoExec(Command) returns (StatementResult) {}
+  rpc StoreProcedure(StoreProcedureRequest) returns (StoreProcedureResponse) {}
+  rpc QueryProcedure(QueryProcedureRequest) returns (QueryResult) {}
+  rpc ExecProcedure(ExecProcedureRequest) returns (StatementResult) {}
 }
